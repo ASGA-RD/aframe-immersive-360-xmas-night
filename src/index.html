@@ -143,19 +143,27 @@
       <!-- helper -->
       <a-entity position="0 3.7 -3">
         <!-- fundo -->
-        <a-plane width="2.6" height="0.8" color="#000" opacity="0.55"></a-plane>
+        <a-plane
+          width="2.8"
+          height="0.9"
+          material="color: #000; opacity: 0.55; shader: flat"
+        ></a-plane>
 
         <!-- texto -->
         <a-entity
           position="0 0 0.01"
           text="
-      value: Vieste ajudar com as luzes? Nao sei o que se passa!\n\n'Dica:\nClica nos NPCs para te deslocares';
-      align: center;
-      width: 2.4;
-      color: #FFF;
-      wrapCount: 28;
-    "
-        ></a-entity>
+    value: Vieste ajudar com as luzes?\nNao sei o que se passa!\n\nDica:\nClica nos NPCs para te deslocares.;
+    align: center;
+    width: 2.5;
+    color: #FFFFFF;
+    wrapCount: 30;
+    lineHeight: 50;
+    outlineWidth: 0;
+    outlineOpacity: 0;
+  "
+        >
+        </a-entity>
       </a-entity>
 
       <!-- NPC 1 -->
