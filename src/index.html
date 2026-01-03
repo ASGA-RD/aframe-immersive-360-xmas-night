@@ -3,34 +3,89 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>aframe-immersive-360-urban-night</title>
+    <title>aframe-immersive-360-xmas-night</title>
     <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
     <script>
       window.addEventListener("DOMContentLoaded", function () {
+        let hasKey = false;
+        let isGeneratorOn = false;
+
         const rig = document.querySelector("#rig");
 
-        const lampHub = document.querySelector("#lamp-hub");
-        const lampLeft = document.querySelector("#lamp-left");
-        const lampRight = document.querySelector("#lamp-right");
+        const npc1 = document.querySelector("#npc1");
+        const npc2 = document.querySelector("#npc2");
+        const npc3 = document.querySelector("#npc3");
 
-        const hint = document.querySelector("#hint");
+        const hNpc2 = document.querySelector("#h-npc2");
+        const hNpc3 = document.querySelector("#h-npc3");
+
+        const genKey = document.querySelector("#generator-key");
+
+        const generator = document.querySelector("#generator");
+        const genSmoke = document.querySelector("#gen-smoke");
+
+        genSmoke.setAttribute("visible", false);
 
         function teleport(x, z) {
           const pos = rig.getAttribute("position");
           rig.setAttribute("position", { x: x, y: pos.y, z: z });
         }
 
-        lampHub.addEventListener("click", function () {
+        function hideAllHelpers() {
+          hNpc2.setAttribute("visible", false);
+          hNpc3.setAttribute("visible", false);
+          genKey.setAttribute("visible", false);
+        }
+
+        function showOnly(...elements) {
+          hideAllHelpers();
+          elements.forEach((el) => el && el.setAttribute("visible", true));
+        }
+
+        // h 2 e 3 invi (and key)
+        hideAllHelpers();
+
+        npc1.addEventListener("click", function () {
           teleport(0, 0);
+          hideAllHelpers();
         });
 
-        lampLeft.addEventListener("click", function () {
-          teleport(-8, 0);
+        npc2.addEventListener("click", function () {
+          teleport(-5, 0.5);
+          showOnly(hNpc2);
         });
 
-        lampRight.addEventListener("click", function () {
-          teleport(8, 0);
+        npc3.addEventListener("click", function () {
+          teleport(5, -0.5);
+
+          if (hasKey) {
+            // se apanhou a chave, mostra o helper apenas
+            showOnly(hNpc3);
+          } else {
+            // ainda não tem, mostra helper + key
+            showOnly(hNpc3, genKey);
+          }
+        });
+
+        genKey.addEventListener("click", function (evt) {
+          if (!genKey.getAttribute("visible")) return;
+          hasKey = true;
+          genKey.setAttribute("visible", false);
+        });
+
+        //gerador
+        generator.addEventListener("click", function () {
+          // se está ligado? return
+          if (isGeneratorOn) return;
+
+          // sem a chave não liga
+          if (!hasKey) return;
+
+          isGeneratorOn = true;
+
+          // visivel o smoke
+          genSmoke.setAttribute("visible", true);
         });
       });
     </script>
@@ -38,15 +93,13 @@
 
   <body style="margin: 0; overflow: hidden">
     <a-scene background="color: #000">
-      <!-- 360 img -->
       <a-assets>
         <img id="foto360" src="assets/360.jpg" crossorigin="anonymous" />
-        <a-asset-item
-          id="lampModel"
-          src="assets/central_park_lamppost.glb"
-        ></a-asset-item>
+        <a-asset-item id="a-npc1" src="assets/chapeu.glb"></a-asset-item>
+        <a-asset-item id="a-npc2" src="assets/azul.glb"></a-asset-item>
+        <a-asset-item id="a-npc3" src="assets/castanho.glb"></a-asset-item>
       </a-assets>
-      <!-- 360 -->
+
       <a-sky src="#foto360" rotation="0 -90 0"></a-sky>
 
       <!-- geo marker -->
@@ -54,11 +107,10 @@
         geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
         material="color: white; shader: flat"
         position="0 0 0"
-      >
-      </a-entity>
+      ></a-entity>
 
       <!-- rig + camera -->
-      <a-entity id="rig" position="0 0 0" scale="0.1 0.1 0.1">
+      <a-entity id="rig" position="0 1.6 0" scale="1 1 1">
         <a-camera
           wasd-controls-enabled="false"
           look-controls="pointerLockEnabled: true"
@@ -69,43 +121,108 @@
             fuse="false"
             material="color: white; shader: flat"
             geometry="primitive: ring; radiusInner: 0.012; radiusOuter: 0.018"
-          >
-          </a-cursor>
+          ></a-cursor>
         </a-camera>
       </a-entity>
 
-      <!-- LUZ AMBIENTE -->
+      <!-- luz ambiente -->
       <a-entity light="type: ambient; intensity: 0.35"></a-entity>
 
-      <!-- Helper -->
-      <a-entity
-        position="0 0.1 -2"
-        text="value: Dica: \n Clica nos candeeiros.; align: center; width: 2"
-      >
+      <!-- helper -->
+      <a-entity position="0 3.5 -3">
+        <!-- fundo -->
+        <a-plane width="2.6" height="0.8" color="#000" opacity="0.55"></a-plane>
+
+        <!-- texto -->
+        <a-entity
+          position="0 0 0.01"
+          text="
+      value: Dica:\nClica nos NPCs para te deslocares;
+      align: center;
+      width: 2.4;
+      color: #FFF;
+      wrapCount: 28;
+    "
+        ></a-entity>
       </a-entity>
 
-      <!-- HOTSPOT 1 -->
+      <!-- NPC 1 -->
       <a-entity
-        id="lamp-hub"
+        id="npc1"
         class="clickable"
-        gltf-model="#lampModel"
+        gltf-model="#a-npc1"
         position="0 0 -3"
+        rotation="0 0 0"
+        scale="1 1 1"
+      >
+        <a-entity
+          light="type: point; intensity: 1.2; distance: 10; decay: 2"
+          position="0 3.2 0"
+        ></a-entity>
+      </a-entity>
+
+      <!-- helper 2 -->
+      <a-entity
+        id="h-npc2"
+        visible="false"
+        position="-5 3.5 3"
+        rotation="0 180 0"
+      >
+        <!-- fundo -->
+        <a-plane width="2.6" height="0.8" color="#000" opacity="0.55"></a-plane>
+
+        <!-- texto -->
+        <a-entity
+          position="0 0 0.01"
+          text="
+      value: Se queres ligar as luzes, precisas da chave do gerador;
+      align: center;
+      width: 2.4;
+      color: #FFF;
+      wrapCount: 28;
+    "
+        ></a-entity>
+      </a-entity>
+
+      <!-- NPC 2 -->
+      <a-entity
+        id="npc2"
+        class="clickable"
+        gltf-model="#a-npc2"
+        position="-5 0 3"
         rotation="0 180 0"
         scale="1 1 1"
       >
         <a-entity
-          light="type: point; intensity: 1.4; distance: 10; decay: 2"
+          light="type: point; intensity: 1.2; distance: 10; decay: 2"
           position="0 3.2 0"
         ></a-entity>
       </a-entity>
 
-      <!-- HOTSPOT 2 -->
+      <!-- helper 3 -->
+      <a-entity id="h-npc3" visible="false" position="5 3.5 -3">
+        <!-- fundo -->
+        <a-plane width="2.6" height="0.8" color="#000" opacity="0.55"></a-plane>
+
+        <!-- texto -->
+        <a-entity
+          position="0 0 0.01"
+          text="
+      value: Se queres ligar as luzes, ajuda-me a procurar a chave do gerador;
+      align: center;
+      width: 2.4;
+      color: #FFF;
+      wrapCount: 28;
+    "
+        ></a-entity>
+      </a-entity>
+      <!-- NPC 3 -->
       <a-entity
-        id="lamp-left"
+        id="npc3"
         class="clickable"
-        gltf-model="#lampModel"
-        position="-8 0 -3"
-        rotation="0 155 0"
+        gltf-model="#a-npc3"
+        position="5 0 -3"
+        rotation="0 0 0"
         scale="1 1 1"
       >
         <a-entity
@@ -114,19 +231,414 @@
         ></a-entity>
       </a-entity>
 
-      <!-- HOTSPOT 3 -->
-      <a-entity
-        id="lamp-right"
-        class="clickable"
-        gltf-model="#lampModel"
-        position="8 0 -3"
-        rotation="0 205 0"
-        scale="1 1 1"
-      >
+      <!-- Postes -->
+      <a-entity id="postes">
+        <!-- poste 1 (npc2) -->
+        <a-cylinder
+          position="-6 3 4"
+          radius="0.08"
+          height="7"
+          color="#222"
+        ></a-cylinder>
+
+        <!-- poste 2 -->
+        <a-cylinder
+          position="6 3 4"
+          radius="0.08"
+          height="7"
+          color="#222"
+        ></a-cylinder>
+
+        <!-- poste 3 (npc3) -->
+        <a-cylinder
+          position="6 3 -4"
+          radius="0.08"
+          height="8"
+          color="#222"
+        ></a-cylinder>
+
+        <!-- poste 4 -->
+        <a-cylinder
+          position="-6 3 -4"
+          radius="0.08"
+          height="7"
+          color="#222"
+        ></a-cylinder>
+      </a-entity>
+
+      <!-- Luzes de Natal  -->
+      <a-entity id="luzes-natal" visible="true">
+        <!-- Cabos -->
         <a-entity
-          light="type: point; intensity: 1.2; distance: 10; decay: 2"
-          position="0 3.2 0"
+          line="start: -6 6 4; end: 6 6 4; color: #666; opacity: 0.75"
         ></a-entity>
+
+        <a-entity
+          line="start: 6 6 4; end: 6 6 -4; color: #666; opacity: 0.75"
+        ></a-entity>
+
+        <a-entity
+          line="start: 6 6 -4; end: -6 6 -4; color: #666; opacity: 0.75"
+        ></a-entity>
+
+        <a-entity
+          line="start: -6 6 -4; end: -6 6 4; color: #666; opacity: 0.75"
+        ></a-entity>
+
+        <!-- Luzes -->
+        <!-- z=4 -->
+        <a-sphere
+          position="-5 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-3 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-1 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="1 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="3 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="5 5.9 4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+
+        <!-- x=6 -->
+        <a-sphere
+          position="6 5.9 3"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="6 5.9 1"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="6 5.9 -1"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="6 5.9 -3"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+
+        <!-- z=-4 -->
+        <a-sphere
+          position="5 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="3 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="1 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-1 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-3 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-5 5.9 -4"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+
+        <!-- x=-6 -->
+        <a-sphere
+          position="-6 5.9 -3"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-6 5.9 -1"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-6 5.9 1"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+        <a-sphere
+          position="-6 5.9 3"
+          radius="0.08"
+          color="#FFD86B"
+          opacity="0.95"
+        ></a-sphere>
+      </a-entity>
+
+      <!-- key (NPC3) -->
+      <a-entity
+        id="generator-key"
+        visible="false"
+        class="clickable"
+        position="7.5 0.05 0"
+        rotation="-90 25 0"
+        geometry="primitive: box; width: 0.35; height: 0.25; depth: 0.25"
+        material="opacity: 0; transparent: true"
+      >
+        <!-- placa -->
+        <a-box
+          width="0.28"
+          height="0.16"
+          depth="0.04"
+          color="#2B2B2B"
+          material="metalness: 0.2; roughness: 0.6"
+        ></a-box>
+
+        <!-- pega -->
+        <a-torus
+          radius="0.10"
+          radius-tubular="0.018"
+          position="0 0.11 0"
+          rotation="0 0 0"
+          color="#FFD86B"
+          material="metalness: 0.4; roughness: 0.35"
+        ></a-torus>
+
+        <!-- pino -->
+        <a-cylinder
+          radius="0.018"
+          height="0.14"
+          position="0 -0.12 0"
+          color="#9A9A9A"
+          material="metalness: 0.7; roughness: 0.25"
+        ></a-cylinder>
+      </a-entity>
+
+      <!-- Banco 1 -->
+      <a-entity
+        id="bench1"
+        position="7.3 0.45 0"
+        rotation="0 270 0"
+        scale="1.5 1.5 1.5"
+      >
+        <!-- Assento -->
+        <a-box
+          width="2.2"
+          height="0.1"
+          depth="0.55"
+          position="0 0.45 0"
+          color="#6B4F2A"
+          material="roughness: 0.8"
+        ></a-box>
+
+        <!-- Encosto -->
+        <a-box
+          width="2.2"
+          height="0.55"
+          depth="0.1"
+          position="0 0.8 -0.22"
+          color="#6B4F2A"
+          material="roughness: 0.8"
+        ></a-box>
+
+        <!-- Perna esquerda -->
+        <a-box
+          width="0.12"
+          height="0.9"
+          depth="0.45"
+          position="-0.95 0.15 0"
+          color="#2B2B2B"
+          material="metalness: 0.3; roughness: 0.6"
+        ></a-box>
+
+        <!-- Perna direita -->
+        <a-box
+          width="0.12"
+          height="0.9"
+          depth="0.45"
+          position="0.95 0.15 0"
+          color="#2B2B2B"
+          material="metalness: 0.3; roughness: 0.6"
+        ></a-box>
+      </a-entity>
+
+      <!-- Banco 2 -->
+      <a-entity
+        id="bench2"
+        position="-7.3 0.45 0"
+        rotation="0 -270 0"
+        scale="1.5 1.5 1.5"
+      >
+        <!-- Assento -->
+        <a-box
+          width="2.2"
+          height="0.1"
+          depth="0.55"
+          position="0 0.45 0"
+          color="#6B4F2A"
+          material="roughness: 0.8"
+        ></a-box>
+
+        <!-- Encosto -->
+        <a-box
+          width="2.2"
+          height="0.55"
+          depth="0.1"
+          position="0 0.8 -0.22"
+          color="#6B4F2A"
+          material="roughness: 0.8"
+        ></a-box>
+
+        <!-- Perna esquerda -->
+        <a-box
+          width="0.12"
+          height="0.9"
+          depth="0.45"
+          position="-0.95 0.15 0"
+          color="#2B2B2B"
+          material="metalness: 0.3; roughness: 0.6"
+        ></a-box>
+
+        <!-- Perna direita -->
+        <a-box
+          width="0.12"
+          height="0.9"
+          depth="0.45"
+          position="0.95 0.15 0"
+          color="#2B2B2B"
+          material="metalness: 0.3; roughness: 0.6"
+        ></a-box>
+      </a-entity>
+
+      <!-- Gerador (NPC2) -->
+      <a-entity
+        id="generator"
+        class="clickable"
+        position="-6.6 0 2.7"
+        rotation="0 110 0"
+        geometry="primitive: box; width: 1.25; height: 0.95; depth: 0.75"
+        material="opacity: 0; transparent: true"
+      >
+        <!-- base -->
+        <a-box
+          width="1.2"
+          height="0.12"
+          depth="0.7"
+          position="0 0.06 0"
+          color="#111"
+          material="roughness: 0.9"
+        ></a-box>
+
+        <!-- corpo -->
+        <a-box
+          width="1.1"
+          height="0.65"
+          depth="0.6"
+          position="0 0.43 0"
+          color="#DCBD4C"
+          material="metalness: 0.25; roughness: 0.6"
+        ></a-box>
+
+        <!-- grelha -->
+        <a-box
+          width="0.85"
+          height="0.02"
+          depth="0.025"
+          position="0 0.52 0.32"
+          color="#333"
+        ></a-box>
+        <a-box
+          width="0.85"
+          height="0.02"
+          depth="0.025"
+          position="0 0.47 0.32"
+          color="#333"
+        ></a-box>
+        <a-box
+          width="0.85"
+          height="0.02"
+          depth="0.025"
+          position="0 0.42 0.32"
+          color="#333"
+        ></a-box>
+        <a-box
+          width="0.85"
+          height="0.02"
+          depth="0.025"
+          position="0 0.37 0.32"
+          color="#333"
+        ></a-box>
+
+        <!-- escape -->
+        <a-cylinder
+          radius="0.03"
+          height="0.35"
+          position="0.3 0.78 -0.22"
+          color="#666"
+          material="metalness: 0.6; roughness: 0.3"
+        ></a-cylinder>
+
+        <!-- topo do escape -->
+        <a-cylinder
+          radius="0.04"
+          height="0.08"
+          position="0.3 0.98 -0.22"
+          color="#444"
+          material="metalness: 0.6; roughness: 0.3"
+        ></a-cylinder>
+
+        <!-- fumo -->
+        <a-entity id="gen-smoke" visible="false" position="0.3 1.02 -0.22">
+          <a-sphere
+            radius="0.06"
+            color="#222121"
+            opacity="1"
+            material="transparent: true; shader: standard; roughness: 1; metalness: 0"
+            animation__rise="property: position; from: 0 0 0; to: 0 0.55 0; dur: 1700; easing: easeOutQuad; loop: true"
+            animation__scale="property: scale; from: 1 1 1; to: 2.2 2.2 2.2; dur: 1700; easing: easeOutQuad; loop: true"
+            animation__fade="property: material.opacity; keyframes: 0:0; 0.15:0.35; 0.85:0.12; 1:0; dur: 1700; easing: linear; loop: true"
+          ></a-sphere>
+        </a-entity>
       </a-entity>
     </a-scene>
   </body>
