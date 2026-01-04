@@ -125,10 +125,11 @@
       <a-entity id="rig" position="0 1.6 0" scale="1 1 1">
         <a-camera
           wasd-controls-enabled="false"
-          look-controls="pointerLockEnabled: true"
+          look-controls="pointerLockEnabled: true; touchEnabled: true"
           fov="70"
         >
           <a-cursor
+            rayOrigin="mouse"
             raycaster="objects: .clickable"
             fuse="false"
             material="color: white; shader: flat"
