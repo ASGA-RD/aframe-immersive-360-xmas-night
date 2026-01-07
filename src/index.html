@@ -101,11 +101,6 @@
         });
       });
 
-      document.addEventListener('click', function () {
-        var entity =
-        document.querySelector('bgMusic');
-        entity.components.sound.playSound();
-      });
     </script>
   </head>
 
@@ -116,13 +111,9 @@
         <a-asset-item id="a-npc1" src="assets/chapeu.glb"></a-asset-item>
         <a-asset-item id="a-npc2" src="assets/azul.glb"></a-asset-item>
         <a-asset-item id="a-npc3" src="assets/castanho.glb"></a-asset-item>
-        <audio id="bgMusic"
-          src="https://discord.com/channels/933492096181088257/933497070067806229/1458405733430333450"
-          crossorigin="anonymous"
-          preload="auto"></audio>
       </a-assets>
 
-      <a-sound src="#bgMusic" autoplay="true" positional="false" loop="true" volume="0.5"></a-sound>
+
 
       <a-sky src="#foto360" rotation="0 -90 0"></a-sky>
 
